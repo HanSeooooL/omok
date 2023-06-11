@@ -23,16 +23,19 @@
 #define EndpointX (StartpointX + (MAX_X - 1) * 2)
 #define EndpointY (StartpointY + (MAX_Y - 1))
 
+void errors(char* msg);
+
 typedef struct _omokboard {
 	int board[MAX_Y][MAX_X];
 } Omokboard;
 
 typedef struct _rank
 {
+	Omokboard* result;
 	char name[20];
-	char result[20];
 	char time[20];
 } Rank;
+
 typedef struct _record {
 	Omokboard* result;
 	int who;
@@ -47,4 +50,7 @@ int checkcanstone(Omokboard* board, int x, int y, int direction);	//지정한 방향�
 void checkstartstone(Omokboard* play, int* x, int* y); // 돌을 놓은 후 다음 상황에서 시작지점에 돌을 놓을 수 있는지, 못 놓는다면 대체로 놓을 곳 선정
 int checkGameStatus(int board[MAX_Y][MAX_X]);	//winlose
 int turn(int board[MAX_Y][MAX_X], int depth, int* a, int* b, int evex, int evey); //AI 메인
-int getWeight(int board[MAX_Y][MAX_X], int x, int y); //가중치 계산
+int getWeight(int board[MAX_Y][MAX_X], int x, int y);
+bool isindexoutofboundsexception(int x, int y);
+
+int minimax(int board[MAX_Y][MAX_X], int depth, int maximizingPlayer, int x, int y);
