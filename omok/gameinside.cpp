@@ -5,17 +5,12 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+
+extern void gotoxy(int x, int y);
 bool bbbbbPattern(int board[MAX_Y][MAX_X], int evex, int evey);
 bool bbbbPattern(int board[MAX_Y][MAX_X], int evex, int evey);
 bool bbPattern(int board[MAX_Y][MAX_X], int evex, int evey);
 bool bbbwPattern(int board[MAX_Y][MAX_X], int evex, int evey);
-int getWeight(int board[MAX_Y][MAX_X], int x, int y);
-bool isindexoutofboundsexception(int x, int y);
-
-const int dx[8] = { 0, 0, 1, 1, 1, -1, -1, -1 };
-const int dy[8] = { 1, -1, 0, 1, -1, 0, 1, -1 };
-
-int aix = 0, aiy = 0; //ai 변수
 
 int checkGameStatus(int board[MAX_Y][MAX_X]) {
 	// 가로 방향 체크
@@ -135,13 +130,6 @@ void putstone(Omokboard* play, int x, int y, int player) {			//돌 놓은 위치 기록
 	play->board[y - StartpointY][(x - StartpointX) / 2] = player;
 }
 
-bool isindexoutofboundsexception(int x, int y) {
-	if (x < 0 || x > MAX_X || y < 0 || y > MAX_Y)
-		return true;
-	else
-		return false;
-}
-
 bool bbbwPattern(int board[MAX_Y][MAX_X], int evex, int evey) {
 	int dx[] = { 1, 1, 0, -1, -1, -1, 0, 1 };
 	int dy[] = { 0, -1, -1, -1, 0, 1, 1, 1 };
@@ -183,8 +171,6 @@ bool bbPattern(int board[MAX_Y][MAX_X], int evex, int evey) {
 			if (nx < 0 || nx >= MAX_X || ny < 0 || ny >= MAX_Y)
 				break;
 			if (board[ny][nx] == stone) {
-				if (i == 2 && (ny == evex || nx == evey))
-					break;  // 직전 돌의 위치인 경우 패턴 미완성
 				++count;
 			}
 			else {
@@ -272,108 +258,38 @@ bool bbbbbPattern(int board[MAX_Y][MAX_X], int evex, int evey) {
 	return false;
 }
 
+bool isindexoutofboundsexception(int x, int y) {
+	if (x < 0 || x > MAX_X || y < 0 || y > MAX_Y)
+		return true;
+	else
+		return false;
+}
+
 int getWeight(int board[MAX_Y][MAX_X], int x, int y) {
 	int w = 0;
 
 	if (bbbwPattern(board, x, y)) {
 		w = 10;
 	}
-
 	if (bbbwPattern(board, x, y)) {
-		w = 20;
+		w = 200;
 	}
 	if (bbbbPattern(board, x, y)) {
-		w = 30;
+		w = 3000;
 	}
-
 	if (bbbbbPattern(board, x, y)) {
-		w = 300;
+		w = 40000;
 	}
 	return w;
 }
 
-// 알파가 큰거 베타가 작은거
-int turn(int board[MAX_Y][MAX_X], int depth, int* a, int* b, int evex, int evey) {
-	if (depth == 3)
-		return getWeight(board, evex, evey);
 
-	if (depth % 2 == 0) {  // ai turn
-
-		int w = INT_MAX;
-		printf("AI\n");
-		for (int y = 0; y < MAX_Y; y++)  // for each child of node
-		{
-			for (int x = 0; x < MAX_X; x++) {
-				int curStone = board[y][x];
-				bool flag = false;
-
-				if (curStone == EMPTY) {
-					int deltax = 0, deltay = 0;
-					for (int k = 0; k < 8; k++) {
-						deltax = x + dx[k];
-						deltay = y + dy[k];
-						if (!isindexoutofboundsexception(deltax, deltay)) continue;
-						if (board[deltay][deltax] != EMPTY) {
-							flag = true;
-							break;
-						}
-					}
-					if (flag) {
-						board[y][x] = BLACK;
-						int w = turn(board, depth + 1, a, b, x, y);
-						board[y][x] = EMPTY;
-						if (*a < w) {
-							*a = w;
-							if (depth == 0) {
-								aix = x;
-								aiy = y;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	else {                              // player turn
-
-		int w = INT_MIN;
-		printf("P\n");
-		for (int y = 0; y < MAX_Y; y++)  // for each child of node
-		{
-
-			for (int x = 0; x < MAX_X; x++) {
-				int curStone = board[y][x];
-				bool flag = false;
-				return getWeight(board, evex, evey);
-
-				if (curStone == EMPTY) {
-					int deltax = 0, deltay = 0;
-					for (int k = 0; k < 8; k++) {
-						deltax = x + dx[k];
-						deltay = y + dy[k];
-						if (!isindexoutofboundsexception(deltax, deltay)) continue;
-						if (board[deltay][deltax] != EMPTY) {
-							flag = true;
-							break;
-						}
-					}
-
-					if (flag) {
-						board[y][x] = WHITE;
-						w = min(w, turn(board, depth + 1, a, b, x, y));
-						board[y][x] = EMPTY;
-					}
-				}
-			}
-		}
-	}
-}
-
-/*int minimax(int board[MAX_Y][MAX_X], int depth, int maximizingPlayer) {
+/*
+int minimax(int board[MAX_Y][MAX_X], int depth, int maximizingPlayer, int x, int y) {
 	// 게임 종료 조건 또는 최대 탐색 깊이 도달 시, 현재 보드 상태의 점수 반환
 	int gameStatus = checkGameStatus(board); // 현재 게임 상태 확인
 	if (gameStatus != 0 || depth == 0) {
-		return calculateScore(board, AI); // AI의 점수를 계산하여 반환
+		return getWeight(board, x, y); // AI의 점수를 계산하여 반환
 	}
 
 	if (maximizingPlayer) { // AI의 차례인 경우
@@ -381,12 +297,20 @@ int turn(int board[MAX_Y][MAX_X], int depth, int* a, int* b, int evex, int evey)
 		for (int i = 0; i < MAX_Y; i++) {
 			for (int j = 0; j < MAX_X; j++) {
 				if (board[i][j] == EMPTY) { // 비어있는 위치에 AI의 돌을 놓아봅니다.
-					board[i][j] = AI; // AI의 돌을 놓음
-					int eval = minimax(board, depth - 1, 0); // 재귀적으로 다음 차례의 플레이어의 최적의 수 탐색
+					board[i][j] = BLACK; // AI의 돌을 놓음
+					gotoxy(0, 5);
+					for (int i = 0; i < MAX_Y; i++)
+					{
+						for (int j = 0; j < MAX_X; j++)
+							printf("%d ", board[i][j]);
+						printf("\n");
+					}
+					int eval = minimax(board, depth - 1, 0, j, i); // 재귀적으로 다음 차례의 플레이어의 최적의 수 탐색
 					// 최대값 선택
 					if (eval > maxEval) {
 						maxEval = eval; // 더 큰 값으로 maxEval 갱신
 					}
+					//printf("%d ", maxEval);
 					// 보드 원래대로 돌려놓기
 					board[i][j] = EMPTY;
 				}
@@ -394,17 +318,26 @@ int turn(int board[MAX_Y][MAX_X], int depth, int* a, int* b, int evex, int evey)
 		}
 		return maxEval; // AI가 선택한 최대값 반환
 	}
+
 	else { // 플레이어의 차례인 경우
 		int minEval = 1000; // 플레이어가 선택한 최소값 초기화
 		for (int i = 0; i < MAX_Y; i++) {
 			for (int j = 0; j < MAX_X; j++) {
 				if (board[i][j] == EMPTY) { // 비어있는 위치에 플레이어의 돌을 놓아봅니다.
-					board[i][j] = PLAYER; // 플레이어의 돌을 놓음
-					int eval = minimax(board, depth - 1, 1); // 재귀적으로 다음 차례의 AI의 최적의 수 탐색
+					board[i][j] = WHITE; // 플레이어의 돌을 놓음
+					gotoxy(0, 5);
+					for (int i = 0; i < MAX_Y; i++)
+					{
+						for (int j = 0; j < MAX_X; j++)
+							printf("%d ", board[i][j]);
+						printf("\n");
+					}
+					int eval = minimax(board, depth - 1, 1, j, i); // 재귀적으로 다음 차례의 AI의 최적의 수 탐색
 					// 최소값 선택
 					if (eval < minEval) {
 						minEval = eval; // 더 작은 값으로 minEval 갱신
 					}
+					//printf("%d ", minEval);
 					// 보드 원래대로 돌려놓기
 					board[i][j] = EMPTY;
 				}
@@ -412,4 +345,19 @@ int turn(int board[MAX_Y][MAX_X], int depth, int* a, int* b, int evex, int evey)
 		}
 		return minEval; // 플레이어가 선택한 최소값 반환
 	}
-}*/
+}
+*/
+
+int compare(const void* a, const void* b)
+{
+	Rank num1 = *(Rank*)a;
+	Rank num2 = *(Rank*)b;
+
+	if (num1.time < num2.time)
+		return -1;
+
+	if (num1.time > num2.time)
+		return 1;
+
+	return 0;
+}
