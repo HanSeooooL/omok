@@ -182,7 +182,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="gameinside.cpp" />
     <ClCompile Include="omok.cpp" />
+    <ClCompile Include="UII.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="omok.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

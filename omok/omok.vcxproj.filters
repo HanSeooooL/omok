@@ -18,5 +18,16 @@
     <ClCompile Include="omok.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="UII.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="gameinside.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="omok.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

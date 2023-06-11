@@ -1,86 +1,7 @@
 ﻿// omok.cpp : 이 파일에는 'main' 함수가 포함됩니다. 거기서 프로그램 실행이 시작되고 종료됩니다.
 #include <stdio.h>
-#include <conio.h>
 #include <Windows.h>
-#include <limits.h>
-#include <math.h>
-#include <stdbool.h>
-
-//키보드 매크로
-#define UP 72		//방향키 위
-#define DOWN 80		//방향키 아래
-#define LEFT 75		//방향키 왼쪽
-#define RIGHT 77	//방향키 오른쪽
-#define ENTER 13	//엔터키
-#define ESC 27		//ESC키
-
-//흑백 매크로
-#define BLACK 1
-#define WHITE 2
-#define EMPTY 0
-#define DRAW_BLACK printf("○")
-#define DRAW_WHITE printf("●")
-
-//바둑판 크기 관련 매크로
-#define StartpointX 20
-#define StartpointY 10
-#define MAX_X 15
-#define MAX_Y 15
-#define EndpointX (StartpointX + (MAX_X - 1) * 2)
-#define EndpointY (StartpointY + (MAX_Y - 1))
-
-int aix, aiy; //ai 변수
-
-typedef struct _omokboard {
-	int board[MAX_Y][MAX_X];
-} Omokboard;
-
-void gotoxy(int x, int y)	//gotoxy
-{
-	COORD pos = { x, y };
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
-}
-
-void textcolor(int color_number)	//글자 색
-{
-	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color_number);
-}
-
-void incursor(int n)
-{
-	HANDLE hConsole;
-	CONSOLE_CURSOR_INFO ConsoleCursor;
-
-	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	ConsoleCursor.bVisible = n;
-	ConsoleCursor.dwSize = 1;
-
-	SetConsoleCursorInfo(hConsole, &ConsoleCursor);
-}
-
-void printOmokboard(int x, int y);
-
-
-void mainUI(void);	//Main UI
-void playUI(int select);	//게임화면
-void RankUI(void);	//랭킹창 UI
-void RankEasyHardUI(void);	//랭킹 난이도 선택
-void selectAIuser(void); //AI대전 user대전 선택
-
-int checkGameStatus(int board[MAX_Y][MAX_X]);	//winlose
-
-void mainscreen(void);
-void RankEasyHardprintscreen(void); 
-void Rankprintscreen(void);				
-void selectAIuserscreen(void);
-void selectAIuserscreen(void);
-void putstone(Omokboard *play, int x, int y, int player);	//엔터를 눌렀을 때 돌의 위치 기록
-int checkcanstone(Omokboard* board, int x, int y, int direction);	//지정한 방향에서 놓을 수 있는 최초의 위치까지의 거리 반환
-void checkstartstone(Omokboard* play, int* x, int* y); // 돌을 놓은 후 다음 상황에서 시작지점에 돌을 놓을 수 있는지, 못 놓는다면 대체로 놓을 곳 선정
-void printboardrecord(Omokboard* record);
-
-int turn(int board[MAX_Y][MAX_X], int depth, int* a, int* b, int evex, int evey); //AI 메인
-int getWeight(int board[MAX_Y][MAX_X], int x, int y); //가중치 계산
+#include "omok.h"
 
 int main() {
 	//RankEasyHardUI();
@@ -89,104 +10,8 @@ int main() {
 	selectAIuser();
 	return 0;
 }
-void mainscreen(void) {
-	system("mode con cols=92 lines=40");
-	system("cls");
-	system("mode con cols=92 lines=40");
-	system("cls");
-	gotoxy(20, 10);
-	printf("랭킹 1등 ");
-	gotoxy(20, 15);
-	printf("랭킹 2등 ");
-	gotoxy(20, 20);
-	printf("랭킹 3등 ");
-	gotoxy(20, 25);
-	printf("뒤로가기 ");
-}
-
-void mainUI(void) {
-	int X = 0, Y = 0;
-	
-}
-
-int checkGameStatus(int board[MAX_Y][MAX_X]) {
-	// 가로 방향 체크
-	for (int i = 0; i < MAX_Y; i++) {
-		for (int j = 0; j < MAX_X - 4; j++) {
-			if (board[i][j] != EMPTY &&
-				board[i][j] == board[i][j + 1] &&
-				board[i][j] == board[i][j + 2] &&
-				board[i][j] == board[i][j + 3] &&
-				board[i][j] == board[i][j + 4]) {
-				return board[i][j]; // 승리한 플레이어 반환
-			}
-		}
-	}
-
-	// 세로 방향 체크
-	for (int i = 0; i < MAX_X - 4; i++) {
-		for (int j = 0; j < MAX_Y; j++) {
-			if (board[i][j] != EMPTY &&
-				board[i][j] == board[i + 1][j] &&
-				board[i][j] == board[i + 2][j] &&
-				board[i][j] == board[i + 3][j] &&
-				board[i][j] == board[i + 4][j]) {
-				return board[i][j]; // 승리한 플레이어 반환
-			}
-		}
-	}
-
-	// 대각선 방향 체크 (왼쪽 위에서 오른쪽 아래로)
-	for (int i = 0; i < MAX_Y - 4; i++) {
-		for (int j = 0; j < MAX_X - 4; j++) {
-			if (board[i][j] != EMPTY &&
-				board[i][j] == board[i + 1][j + 1] &&
-				board[i][j] == board[i + 2][j + 2] &&
-				board[i][j] == board[i + 3][j + 3] &&
-				board[i][j] == board[i + 4][j + 4]) {
-				return board[i][j]; // 승리한 플레이어 반환
-			}
-		}
-	}
-
-	// 대각선 방향 체크 (오른쪽 위에서 왼쪽 아래로)
-	for (int i = 0; i <  MAX_X - 4; i++) {
-		for (int j = 4; j < MAX_Y; j++) {
-			if (board[i][j] != EMPTY &&
-				board[i][j] == board[i + 1][j - 1] &&
-				board[i][j] == board[i + 2][j - 2] &&
-				board[i][j] == board[i + 3][j - 3] &&
-				board[i][j] == board[i + 4][j - 4]) {
-				return board[i][j]; // 승리한 플레이어 반환
-			}
-		}
-	}
-	return 0;
-}
-
-void printboardrecord(Omokboard* record) {
-	int x = StartpointX;
-	int y = StartpointY;
-	int rx = 0, ry = 0;
-	printOmokboard(x, y);
-	while (ry < MAX_Y) {
-		while (record->board[ry][rx] == 0 && rx < MAX_X) {
-			rx += 1;
-		}
-		if (rx >= MAX_X) {
-			rx = 0;
-			ry += 1;
-			continue;
-		}
-		gotoxy(x + (rx * 2), y + ry);
-		if (record->board[ry][rx] == BLACK)
-			DRAW_BLACK;
-		else if (record->board[ry][rx] == WHITE)
-			DRAW_WHITE;
-	}
-}
-
-void playUI(int select) {
+/*
+Omokboard* playUI(int select) {
 
 	Omokboard* play;
 	int X, Y, cursor, check, finish; //gotoxy와 관련된 변수
@@ -211,12 +36,12 @@ void playUI(int select) {
 
 	while (1) {
 		gotoxy(0, 0);
-		/*for (int i = 0; i < MAX_Y; i++)
+		for (int i = 0; i < MAX_Y; i++)
 		{
 			for (int j = 0; j < MAX_X; j++)
 				printf("%d ", play->board[i][j]);
 			printf("\n");
-		}  */
+		} 
 		cursor = _getch();
 
 		switch (cursor) {
@@ -369,33 +194,38 @@ void playUI(int select) {
 			{
 				gotoxy(0, 0);
 				printf("BLACK");
-				return;
+				return play;
 			}
 			else if (finish == WHITE)
 			{
 				gotoxy(0, 0);
 				printf("WHITE");
-				return;
+				return play;
 			}
+
 			//AI모드 추가
 			if (select == 1)
 			{
-				turn(play -> board, 4, 0, 0, X, Y);
+				gotoxy(0, 0);
+				printf("NO\n");
+				turn(play -> board, 0, 0, 0, (X - StartpointX) / 2, Y - StartpointY);
+
 				gotoxy((aix * 2) + StartpointX, aiy + StartpointY);
 				DRAW_BLACK;
 				putstone(play, aix, aiy, BLACK);
+
 				finish = checkGameStatus(play->board);
 				if (finish == BLACK)
 				{
 					gotoxy(0, 0);
 					printf("BLACK");
-					return;
+					return play;
 				}
 				else if (finish == WHITE)
 				{
 					gotoxy(0, 0);
 					printf("WHITE");
-					return;
+					return play;
 				}
 				if (player == WHITE)
 					player = BLACK;
@@ -417,308 +247,9 @@ void playUI(int select) {
 		continue;
 	}
 }
+*/
 
-void checkstartstone(Omokboard* play, int* x, int* y) {
-	while (1) {
-		gotoxy(0, 20);
-		if (play->board[*y - StartpointY][(*x - StartpointX) / 2] != 0) {
-			if (*x < EndpointX)
-				*x += 2;
-			else if (*y < EndpointY) {
-				*y += 1;
-				*x = StartpointX;
-			}
-		}
-		else
-			break;
-	}
-}
-
-int checkcanstone(Omokboard* play, int x, int y, int direction)	//지정한 방향에서 놓을 수 있는 최초의 위치까지의 거리 반환 (-1반환시 제자리 정지)
-{
-	int res = 0, tmp, rx, ry, i = -99;
-	/*if ((direction == RIGHT && x >= EndpointX) || (direction == LEFT && x <= StartpointX) || (direction == DOWN && y >= EndpointY) || (direction == UP && y <= StartpointY)) {
-		return -1;
-	} */
-
-	rx = (x - StartpointX) / 2;
-	ry = y - StartpointY;
-
-	if (direction == LEFT || direction == UP)
-		tmp = -1;
-	else
-		tmp = 1;
-
-	if (direction == LEFT || direction == RIGHT) {
-		for (i = rx + tmp; i >= 0 && i < MAX_X; i += tmp)
-		{
-			if (play->board[ry][i] == 0) {
-				break;
-			}
-		}
-		res = i;
-		if (res == MAX_X || res == -1)
-			return -1;
-		else
-			return (res * 2) + StartpointX;
-	}
-
-	else {
-		for (i = ry + tmp; i >= 0 && i < MAX_Y; i += tmp) {
-			if (play->board[i][rx] == 0) {
-				break;
-			}
-		}
-		res = i;
-		if (res == MAX_Y || res == -1)
-			return -1;
-		else
-			return res + StartpointY;
-	}
-}
-
-void putstone(Omokboard *play, int x, int y, int player) {			//돌 놓은 위치 기록
-	play->board[y - StartpointY][(x - StartpointX) / 2] = player;
-}
-
-//┌│┐─└ ┘┬ ┴ ┼├ ┤
-void printOmokboard(int x, int y) {
-	int X = x;
-	int Y = y;
-	system("mode con cols=92 lines=40");
-	system("cls");
-	gotoxy(X, Y);
-	printf("┌─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┐");	//15x15 변경시 수정
-	for (int i = 0; i < MAX_Y-2; i++) {
-		Y += 1;
-		gotoxy(X, Y);
-		printf("├─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┼─┤");
-	}
-	Y += 1;
-	gotoxy(X, Y);
-	printf("└─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┘");	//15x15 변경시 수정
-}
-
-void RankEasyHardprintscreen() {
-	system("mode con cols=92 lines=40");
-	system("cls");
-	gotoxy(20, 15);
-	printf("EASY");
-	gotoxy(72, 15);
-	printf("HARD");
-	gotoxy(46, 25);
-	printf("뒤로가기");
-}
-
-void selectAIuserscreen(void) {
-	system("mode con cols=92 lines=40");
-	system("cls");
-	gotoxy(20, 15);
-	printf("User");
-	gotoxy(72, 15);
-	printf("AI");
-	gotoxy(46, 25);
-	printf("뒤로가기");
-}
-
-void selectAIuser(void) {
-	system("cls");
-	int X = 18, Y = 15;
-	int test, select;
-	selectAIuserscreen();
-	gotoxy(X, Y);
-	printf(">");
-	while (1) {
-		test = _getch();
-		switch (test) {
-		case LEFT: gotoxy(X, Y);
-			printf(" ");
-			X = 18;
-			Y = 15;
-			gotoxy(X, Y);
-			printf(">");
-			break;
-		case RIGHT: gotoxy(X, Y);
-			printf(" ");
-			X = 70;
-			Y = 15;
-			gotoxy(X, Y);
-			printf(">");
-			break;
-		case DOWN: gotoxy(X, Y);
-			printf(" ");
-			X = 44;
-			Y = 25;
-			gotoxy(X, Y);
-			printf(">");
-			break;
-		case ENTER: gotoxy(X, Y);
-			if (X == 18) {
-				select = 0;	//유저대전 선택
-				playUI(select);
-				return;
-			}
-			else if (X == 70) {
-				select = 1;	//AI대전 선택
-				playUI(select);
-				return;
-			}
-			else if (X == 44) {
-				return;
-			}
-		case ESC:
-			return;
-		}
-		gotoxy(80, 38);
-		printf("%2d %2d", X, Y); continue;
-	}
-	system("pause>nul");
-	fflush(stdin);
-}
-
-void RankEasyHardUI(void)
-{
-	system("cls");
-	int X = 18, Y = 15;
-	int test, select;
-	RankEasyHardprintscreen();
-	gotoxy(X, Y);
-	printf(">");
-	while (1) {
-		test = _getch();
-		switch (test) {
-		case LEFT: gotoxy(X, Y);
-			printf(" ");
-			X = 18;
-			Y = 15;
-			gotoxy(X, Y);
-			printf(">");
-			break;
-		case RIGHT: gotoxy(X, Y);
-			printf(" ");
-			X = 70;
-			Y = 15;
-			gotoxy(X, Y);
-			printf(">");
-			break;
-		case DOWN: gotoxy(X, Y);
-			printf(" ");
-			X = 44;
-			Y = 25;
-			gotoxy(X, Y);
-			printf(">");
-			break;
-		case ENTER: gotoxy(X, Y);
-			if (X == 18) {
-				select = 0;
-				RankUI();
-				RankEasyHardprintscreen();
-				gotoxy(X, Y);
-				printf(">");
-				break;
-			}
-			else if (X == 70) {
-				select = 1;
-				RankUI();
-				system("cls");
-				RankEasyHardprintscreen();
-				gotoxy(X, Y);
-				printf(">");
-				break;
-			}
-			else if (X == 44) {
-				return;
-			}
-		case ESC:
-			return;
-		}
-		gotoxy(80, 38);
-		printf("%2d %2d", X, Y); continue;
-	}
-	system("pause>nul");
-	fflush(stdin);
-}
-
-void Rankprintscreen(void) {
-	system("mode con cols=92 lines=40");
-	system("cls");
-	gotoxy(20, 10);
-	printf("랭킹 1등 ");
-	gotoxy(20, 15);
-	printf("랭킹 2등 ");
-	gotoxy(20, 20);
-	printf("랭킹 3등 ");
-	gotoxy(20, 25);
-	printf("뒤로가기 ");
-}
-
-void RankUI(void)
-{
-	int X = 16, Y = 10;
-	int test;
-	Rankprintscreen();
-	gotoxy(X, Y);
-	printf(">");
-	while (1) {
-		test = _getch();
-
-		switch (test) {
-		case UP: gotoxy(X, Y);
-			if (Y <= 10) {
-				break;
-			}
-			else {
-				printf(" ");
-				Y -= 5;
-				gotoxy(X, Y);
-				printf(">");
-				break;
-			}
-		case DOWN: gotoxy(X, Y);
-			if (Y >= 25) {
-				break;
-			}
-			else {
-				printf(" ");
-				Y += 5;
-				gotoxy(X, Y);
-				printf(">");
-				break;
-			}
-		case ENTER:
-			if (Y == 10) {
-				//1등 상세정보 출력
-				Rankprintscreen();
-				break;
-			}
-			else if (Y == 15) {
-				//2등 상세정보 출력
-				Rankprintscreen();
-				break;
-			}
-			else if (Y == 20) {
-				//3등 상세정보 출력
-				Rankprintscreen();
-				break;
-			}
-			else if (Y == 25) {
-				//뒤로가기 입력
-				return;
-			}
-		case ESC:
-			return;
-		}
-		gotoxy(80, 38);
-		printf("%2d %2d", X, Y); continue;
-	}
-	system("pause>nul");
-	fflush(stdin);
-}
-
-const int dx[8] = { 0, 0, 1, 1, 1, -1, -1, -1 };
-const int dy[8] = { 1, -1, 0, 1, -1, 0, 1, -1 };
-
-bool isindexoutofboundsexception(int x, int y) {
+/*bool isindexoutofboundsexception(int x, int y) {
 	if (x < 0 || x > MAX_X || y < 0 || y > MAX_Y)
 		return true;
 	else
@@ -857,6 +388,7 @@ bool bbbbbPattern(int board[MAX_Y][MAX_X], int evex, int evey) {
 
 int getWeight(int board[MAX_Y][MAX_X], int x, int y) {
 	int w = 0;
+
 	if (bbbwPattern(board, x, y)) {
 		w = 10;
 	}
@@ -876,12 +408,12 @@ int getWeight(int board[MAX_Y][MAX_X], int x, int y) {
 
 // 알파가 큰거 베타가 작은거
 int turn(int board[MAX_Y][MAX_X], int depth, int* a, int* b, int evex, int evey) {
-
 	if (depth == 3)
 		return getWeight(board, evex, evey);
 
 	if (depth % 2 == 0) {  // ai turn
 		int w = INT_MAX;
+		printf("AI\n");
 		for (int y = 0; y < MAX_Y; y++)  // for each child of node
 		{
 			for (int x = 0; x < MAX_X; x++) {
@@ -916,6 +448,7 @@ int turn(int board[MAX_Y][MAX_X], int depth, int* a, int* b, int evex, int evey)
 	}
 	else {                              // player turn
 		int w = INT_MIN;
+		printf("P\n");
 		for (int y = 0; y < MAX_Y; y++)  // for each child of node
 		{
 			for (int x = 0; x < MAX_X; x++) {
@@ -936,7 +469,7 @@ int turn(int board[MAX_Y][MAX_X], int depth, int* a, int* b, int evex, int evey)
 					}
 
 					if (flag) {
-						board[y][x] = BLACK;
+						board[y][x] = WHITE;
 						w = min(w, turn(board, depth + 1, a, b, x, y));
 						board[y][x] = EMPTY;
 					}
@@ -944,4 +477,4 @@ int turn(int board[MAX_Y][MAX_X], int depth, int* a, int* b, int evex, int evey)
 			}
 		}
 	}
-}
+} */
