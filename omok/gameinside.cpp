@@ -1,8 +1,16 @@
 #include "omok.h"
 #include <limits.h>
+#include <math.h>
 #include <Windows.h>
 #include <stdbool.h>
 #include <stdio.h>
+
+bool bbbbbPattern(int board[MAX_Y][MAX_X], int evex, int evey);
+bool bbbbPattern(int board[MAX_Y][MAX_X], int evex, int evey);
+bool bbPattern(int board[MAX_Y][MAX_X], int evex, int evey);
+bool bbbwPattern(int board[MAX_Y][MAX_X], int evex, int evey);
+int getWeight(int board[MAX_Y][MAX_X], int x, int y);
+bool isindexoutofboundsexception(int x, int y);
 
 const int dx[8] = { 0, 0, 1, 1, 1, -1, -1, -1 };
 const int dy[8] = { 1, -1, 0, 1, -1, 0, 1, -1 };
@@ -313,6 +321,7 @@ int turn(int board[MAX_Y][MAX_X], int depth, int* a, int* b, int evex, int evey)
 					if (flag) {
 						board[y][x] = BLACK;
 						int w = turn(board, depth + 1, a, b, x, y);
+						board[y][x] = EMPTY;
 						if (*a < w) {
 							*a = w;
 							if (depth == 0) {
@@ -350,7 +359,6 @@ int turn(int board[MAX_Y][MAX_X], int depth, int* a, int* b, int evex, int evey)
 					}
 
 					if (flag) {
-
 						board[y][x] = WHITE;
 						w = min(w, turn(board, depth + 1, a, b, x, y));
 						board[y][x] = EMPTY;

@@ -7,7 +7,8 @@ int main() {
 	//RankEasyHardUI();
 	//printOmokboard();
 	//playUI();
-	selectAIuser();
+	//selectAIuser();
+	title();
 	return 0;
 }
 /*

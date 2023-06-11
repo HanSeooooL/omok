@@ -14,11 +14,14 @@ Omokboard* playUI(int select);
 void RankUI(void);	//랭킹창 UI
 void RankEasyHardUI(void);	//랭킹 난이도 선택
 void selectAIuser(void); //AI대전 user대전 선택
+void record(void); //기록
 
 void printOmokboard(int x, int y);
+void titlescreen(void);
 void RankEasyHardprintscreen(void);
 void Rankprintscreen(void);
 void selectAIuserscreen(void);
+void recordscreen(void);
 void printboardrecord(Omokboard* record);
 
 void gotoxy(int x, int y)	//gotoxy
@@ -71,13 +74,6 @@ Omokboard* playUI(int select) {
 		DRAW_WHITE;
 
 	while (1) {
-		gotoxy(0, 0);
-		/*for (int i = 0; i < MAX_Y; i++)
-		{
-			for (int j = 0; j < MAX_X; j++)
-				printf("%d ", play->board[i][j]);
-			printf("\n");
-		}  */
 		cursor = _getch();
 
 		switch (cursor) {
@@ -221,6 +217,13 @@ Omokboard* playUI(int select) {
 
 		case ENTER:
 			putstone(play, X, Y, player);
+			gotoxy(0, 5);
+			for (int i = 0; i < MAX_Y; i++)
+			{
+				for (int j = 0; j < MAX_X; j++)
+					printf("%d ", play->board[i][j]);
+				printf("\n");
+			}
 			if (player == WHITE)
 				player = BLACK;
 			else if (player == BLACK)
@@ -249,7 +252,13 @@ Omokboard* playUI(int select) {
 				DRAW_BLACK;
 
 				putstone(play, aix, aiy, BLACK);
-
+				gotoxy(0, 5);
+				for (int i = 0; i < MAX_Y; i++)
+				{
+					for (int j = 0; j < MAX_X; j++)
+						printf("%d ", play->board[i][j]);
+					printf("\n");
+				}
 				finish = checkGameStatus(play->board);
 				if (finish == BLACK)
 				{
@@ -538,4 +547,103 @@ void printboardrecord(Omokboard* record) {
 		else if (record->board[ry][rx] == WHITE)
 			DRAW_WHITE;
 	}
+}
+
+void titlescreen(void) {
+	system("mode con cols=92 lines=40");
+	system("cls");
+	gotoxy(0, 0);
+	printf("\n\n\n\n");
+	printf("		       ●●●●●                 ●●●●●●●   \n");
+	printf("		     ●          ●               ●          ●   \n");
+	printf("		    ●            ●              ●          ●   \n");
+	printf("		     ●          ●               ●●●●●●●   \n");
+	printf("		       ●●●●●                       ●         \n");
+	printf("		                               ●●●●●●●●●●\n");
+	printf("		           ●                                      \n");
+	printf("		           ●                    ●●●●●●●●  \n");
+	printf("		  ●●●●●●●●●●                         ●  \n");
+	printf("                                                               ●\n");
+
+
+	gotoxy(36, 18);
+	printf("1. 대전 선택");
+	gotoxy(36, 20);
+	printf("2.   기록");
+	gotoxy(36, 22);
+	printf("3.   랭킹\n");
+}
+
+void title()
+{
+	int test;
+	int X = 34, Y = 18;
+	titlescreen();
+	gotoxy(X, Y);
+	printf(">");
+
+	while (1) {
+		test = _getch();
+		switch (test) {
+		case UP: gotoxy(X, Y);
+			if (Y <= 18)
+				break;
+			printf(" ");
+			Y -= 2;
+			gotoxy(X, Y);
+			printf(">");
+			break;
+		case DOWN: gotoxy(X, Y);
+			if (Y >= 22)
+				break;
+			printf(" ");
+			Y += 2;
+			gotoxy(X, Y);
+			printf(">");
+			break;
+		case ENTER: gotoxy(X, Y);
+			if (Y == 18) {
+				selectAIuser();
+				return;
+			}
+			else if (Y == 20) {
+				record();
+				return;
+			}
+			else if (Y == 22) {
+				return;
+			}
+		case ESC:
+			return;
+		}
+	}
+}
+
+void recordscreen(void) {
+	system("cls");
+
+	gotoxy(0, 0);
+	printf("\n\n");
+	printf("          ●●●●    ●●●●     ●●●       ●●●     ●●●●    ●●●  \n");
+	printf("          ●     ●   ●          ●     ●    ●    ●    ●     ●   ●    ●\n");
+	printf("          ●●●●    ●●●●   ●           ●      ●   ●●●●    ●    ●\n");
+	printf("          ●  ●      ●          ●     ●    ●    ●    ●  ●      ●    ●\n");
+	printf("          ●    ●    ●●●●     ●●●       ●●●     ●    ●    ●●●  \n");
+
+	gotoxy(10, 15);
+	int y = 15;
+	for (int i = 0; i < 5; i++)
+	{
+		printf("%d. 경기 이름: 		경기 결과: 		경기 시간:  \n", i + 1);
+		y += 2;
+		gotoxy(10, y);
+	}
+}
+void record()
+{
+	Rank arr[5] = { 0 };
+	recordscreen();
+
+	gotoxy(0, 34);
+	printf("뒤로가기\n");
 }

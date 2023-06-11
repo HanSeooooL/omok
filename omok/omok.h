@@ -16,8 +16,8 @@
 #define DRAW_WHITE printf("●")
 
 //바둑판 크기 관련 매크로
-#define StartpointX 20
-#define StartpointY 10
+#define StartpointX 40
+#define StartpointY 20
 #define MAX_X 15
 #define MAX_Y 15
 #define EndpointX (StartpointX + (MAX_X - 1) * 2)
@@ -27,6 +27,12 @@ typedef struct _omokboard {
 	int board[MAX_Y][MAX_X];
 } Omokboard;
 
+typedef struct _rank
+{
+	char name[20];
+	char result[20];
+	char time[20];
+} Rank;
 typedef struct _record {
 	Omokboard* result;
 	int who;
@@ -34,7 +40,7 @@ typedef struct _record {
 	char name2[3];
 } Record;
 
-void selectAIuser(void); //AI대전 user대전 선택
+void title(void); // 메인화면
 
 void putstone(Omokboard* play, int x, int y, int player);	//엔터를 눌렀을 때 돌의 위치 기록
 int checkcanstone(Omokboard* board, int x, int y, int direction);	//지정한 방향에서 놓을 수 있는 최초의 위치까지의 거리 반환
