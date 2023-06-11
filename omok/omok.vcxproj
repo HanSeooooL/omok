@@ -182,6 +182,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="FILEINOUT.cpp" />
     <ClCompile Include="gameinside.cpp" />
     <ClCompile Include="omok.cpp" />
     <ClCompile Include="UII.cpp" />

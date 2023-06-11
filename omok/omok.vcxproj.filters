@@ -24,6 +24,9 @@
     <ClCompile Include="gameinside.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="FILEINOUT.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="omok.h">
