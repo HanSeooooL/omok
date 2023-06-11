@@ -64,7 +64,6 @@ Omokboard* playUI(int select) {
 	}
 
 	printOmokboard(StartpointX, StartpointY);			//오목판 UI불러오기
-	incursor(0);
 	X = StartpointX;
 	Y = StartpointY;
 	gotoxy(X, Y);
@@ -300,7 +299,7 @@ void printOmokboard(int x, int y) {
 	system("mode con cols=92 lines=40");
 	system("cls");
 	gotoxy(X, Y);
-	printf("┌─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┐");	//15x15 변경시 수정
+	printf("┌─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┬─┐");
 	for (int i = 0; i < MAX_Y - 2; i++) {
 		Y += 1;
 		gotoxy(X, Y);
@@ -308,7 +307,7 @@ void printOmokboard(int x, int y) {
 	}
 	Y += 1;
 	gotoxy(X, Y);
-	printf("└─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┘");	//15x15 변경시 수정
+	printf("└─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┴─┘");
 }
 
 void RankEasyHardprintscreen() {
@@ -527,31 +526,10 @@ void RankUI(void)
 	fflush(stdin);
 }
 
-void printboardrecord(Omokboard* record) {
-	int x = StartpointX;
-	int y = StartpointY;
-	int rx = 0, ry = 0;
-	printOmokboard(x, y);
-	while (ry < MAX_Y) {
-		while (record->board[ry][rx] == 0 && rx < MAX_X) {
-			rx += 1;
-		}
-		if (rx >= MAX_X) {
-			rx = 0;
-			ry += 1;
-			continue;
-		}
-		gotoxy(x + (rx * 2), y + ry);
-		if (record->board[ry][rx] == BLACK)
-			DRAW_BLACK;
-		else if (record->board[ry][rx] == WHITE)
-			DRAW_WHITE;
-	}
-}
-
 void titlescreen(void) {
 	system("mode con cols=92 lines=40");
 	system("cls");
+	incursor(0);
 	gotoxy(0, 0);
 	printf("\n\n\n\n");
 	printf("		       ●●●●●                 ●●●●●●●   \n");
@@ -604,14 +582,20 @@ void title()
 		case ENTER: gotoxy(X, Y);
 			if (Y == 18) {
 				selectAIuser();
-				return;
+				titlescreen();
+				gotoxy(X, Y);
+				printf(">");
+				break;
 			}
 			else if (Y == 20) {
 				record();
-				return;
+				titlescreen();
+				gotoxy(X, Y);
+				printf(">");
+				break;
 			}
 			else if (Y == 22) {
-				return;
+				break;
 			}
 		case ESC:
 			return;
@@ -620,6 +604,7 @@ void title()
 }
 
 void recordscreen(void) {
+	int y = 15;
 	system("cls");
 
 	gotoxy(0, 0);
@@ -630,20 +615,74 @@ void recordscreen(void) {
 	printf("          ●  ●      ●          ●     ●    ●    ●    ●  ●      ●    ●\n");
 	printf("          ●    ●    ●●●●     ●●●       ●●●     ●    ●    ●●●  \n");
 
-	gotoxy(10, 15);
-	int y = 15;
+	gotoxy(10, y);
 	for (int i = 0; i < 5; i++)
 	{
 		printf("%d. 경기 이름: 		경기 결과: 		경기 시간:  \n", i + 1);
 		y += 2;
 		gotoxy(10, y);
 	}
+	gotoxy(10, 25);
+	printf("뒤로가기\n");
 }
+
 void record()
 {
 	Rank arr[5] = { 0 };
+	int test;
+	int X = 8, Y = 15;
 	recordscreen();
 
-	gotoxy(0, 34);
-	printf("뒤로가기\n");
+	gotoxy(X, Y);
+	printf(">");
+
+	while (1) {
+		test = _getch();
+		switch (test) {
+		case UP: gotoxy(X, Y);
+			if (Y <= 15)
+				break;
+			printf(" ");
+			Y -= 2;
+			gotoxy(X, Y);
+			printf(">");
+			break;
+		case DOWN: gotoxy(X, Y);
+			if (Y >= 25)
+				break;
+			printf(" ");
+			Y += 2;
+			gotoxy(X, Y);
+			printf(">");
+			break;
+		case ENTER: gotoxy(X, Y);
+			if (Y == 25)
+				return;
+
+		case ESC:
+			return;
+		}
+	}
+}
+
+void printboardrecord(Omokboard* record) {
+	int x = StartpointX;
+	int y = StartpointY;
+	int rx = 0, ry = 0;
+	printOmokboard(x, y);
+	while (ry < MAX_Y) {
+		while (record->board[ry][rx] == 0 && rx < MAX_X) {
+			rx += 1;
+		}
+		if (rx >= MAX_X) {
+			rx = 0;
+			ry += 1;
+			continue;
+		}
+		gotoxy(x + (rx * 2), y + ry);
+		if (record->board[ry][rx] == BLACK)
+			DRAW_BLACK;
+		else if (record->board[ry][rx] == WHITE)
+			DRAW_WHITE;
+	}
 }
